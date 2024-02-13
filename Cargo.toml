@@ -5,6 +5,9 @@ edition = "2021"
 
 [dependencies]
 approx = "0.5.1"
+glium = "0.34.0"
+katexit = "0.1.4"
 nalgebra = "0.32.3"
-num-traits = "0.2.17"
+num-traits = "0.2.18"
 simba = "0.8.1"
+winit = "0.29.10"

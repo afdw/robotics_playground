@@ -1120,19 +1120,23 @@ where
     }
 }
 
-pub trait FloatDeriv<F>: Deriv<Base = F> + Float + RealField + ComplexField<RealField = Self>
-where
-    F: FloatScalar,
-{
+pub trait FloatDeriv: Deriv<Base = Self::Scalar> + Float + RealField + ComplexField<RealField = Self> {
+    type Scalar: FloatScalar;
 }
 
-impl<F> FloatDeriv<F> for F where F: FloatScalar + RealField {}
+impl<F> FloatDeriv for F
+where
+    F: FloatScalar + RealField,
+{
+    type Scalar = F;
+}
 
-impl<F, T> FloatDeriv<F> for Dual<T>
+impl<F, T> FloatDeriv for Dual<T>
 where
     F: FloatScalar,
-    T: FloatDeriv<F>,
+    T: FloatDeriv<Scalar = F>,
 {
+    type Scalar = F;
 }
 
 pub trait Transpose {
@@ -1314,8 +1318,8 @@ mod tests {
 
     #[test]
     fn polynomial() {
-        fn f<T: FloatDeriv<f64>>(x: T) -> T {
-            T::r#const(3.0) * x + x * x
+        fn f<D: FloatDeriv<Scalar = f64>>(x: D) -> D {
+            D::r#const(3.0) * x + x * x
         }
 
         assert!(f(7.0).float_deriv_approx_eq(70.0));
@@ -1325,7 +1329,7 @@ mod tests {
 
     #[test]
     fn multiple_variables() {
-        fn f<T: FloatDeriv<f64>>(x: T, y: T) -> (T, T, T) {
+        fn f<D: FloatDeriv<Scalar = f64>>(x: D, y: D) -> (D, D, D) {
             (x + y, Float::exp(x), Float::sin(y))
         }
 
@@ -1340,7 +1344,7 @@ mod tests {
     fn matrices() {
         use nalgebra::{Matrix2, Rotation2};
 
-        fn f<T: FloatDeriv<f64>>(angle: T) -> Matrix2<T> {
+        fn f<D: FloatDeriv<Scalar = f64>>(angle: D) -> Matrix2<D> {
             *Rotation2::new(angle).matrix()
         }
 
